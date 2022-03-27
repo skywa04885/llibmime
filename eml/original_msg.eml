@@ -1,0 +1,81 @@
+Delivered-To: luke.rieff@gmail.com
+Received: by 2002:a17:90a:a382:0:0:0:0 with SMTP id x2csp4225052pjp;
+        Fri, 25 Mar 2022 07:21:07 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwoi/puNKn56cnzoz28dtWFjBYhxZSAcNMzoQ1v1+4W6O5KY4HVXPhXc84TniijFQrWracF
+X-Received: by 2002:a17:907:9605:b0:6d7:24d1:f4ce with SMTP id gb5-20020a170907960500b006d724d1f4cemr11765724ejc.524.1648218067333;
+        Fri, 25 Mar 2022 07:21:07 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1648218067; cv=none;
+ d=google.com; s=arc-20160816;
+ b=GJCFcT5rRsWTM+XBz7FVamS8lIYLtSxt6ZOgyYhKl8k22CMQoVs1BGNXxTCqP/qQD4
+  LNJ6GZnbA6NSMtaGxqCTgQg9Fx4AlY9DMnmwafoQz+SecOWJIdm+O5dmf1xgfz3zac7r
+  ZQrd7+Nu074OM/5LqRKmc7lua9Vns+uDKnWkZNH3j0fhsHd8xhxTlUh0jGAsiACbsuE7
+  Fw14l4Ir6qOwiXAiVwfeWNud8HTNVs5WimJUgNro1umAvN3HvP5oAYe5IDakIRVWz8Ln
+  UH2EPN5Jwv2mR6OpG7VHT8IYWCORm//ZgKvf1qUFPkyuGq6rPqV4zYRCX8MgRJAqUVQt
+  jSew==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=mime-version:from:message-id:date;
+        bh=e5OcB9HF3hL3JRsom71M/Gn8MZ2IQ8edC8pKZFmwCSY=;
+        b=vsWCQ1SR1WW3U6q7wgVtLlwbSmnpz6iU500+sFPCpL5hCwpCJs01jH1IMgUeBDllA3
+         x6HoSi6AAKx4ySlpf2FEXPppzS0GqVcRpqXviZ8AzVSTOz9HKbe8FEcyYx1rxpQBoktx
+         Q4526pt0/3lIgXa0IFjBCLQHx5iloeUYmokacQJH2DmWqyGa+a/T5bKfgx2tgzlkSTjV
+         aBLVo23uPv+jFHmn+epMVZ5P+dHHMdYLd38m8Yo3d4pPk4rxHONMQUlgGVrRPYmWusHK
+         c9mCJTnCpLCBZGea1ilTZpy7/Q6klYJveP9l2nbv9Oyi0qCHDHztZD0a+0zTSlQdH+Yr
+         RwIw==
+ARC-Authentication-Results: i=1; mx.google.com;
+       spf=neutral (google.com: 185.165.68.162 is neither permitted nor denied by best guess record for domain of luke.rieff@kaas.com) smtp.mailfrom=luke.rieff@kaas.com
+Return-Path: <luke.rieff@kaas.com>
+Received: from asd.com ([185.165.68.162])
+        by mx.google.com with ESMTP id d6-20020a1709061f4600b006df76385c95si2466848ejk.309.2022.03.25.07.21.07
+        for <luke.rieff@gmail.com>;
+        Fri, 25 Mar 2022 07:21:07 -0700 (PDT)
+Received-SPF: neutral (google.com: 185.165.68.162 is neither permitted nor denied by best guess record for domain of luke.rieff@kaas.com) client-ip=185.165.68.162;
+Authentication-Results: mx.google.com;
+       spf=neutral (google.com: 185.165.68.162 is neither permitted nor denied by best guess record for domain of luke.rieff@kaas.com) smtp.mailfrom=luke.rieff@kaas.com
+Date: Fri, 25 Mar 2022 07:21:07 -0700 (PDT)
+Message-ID: <623dcfd3.1c69fb81.551b3.285eSMTPIN_ADDED_MISSING@mx.google.com>
+From: Some One <someone@example.com>
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+        boundary="XXXXboundary text"
+
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+This is a multipart message in MIME format.
+
+--XXXXboundary text
+Content-Type: text/plain
+
+this is the body text
+
+--XXXXboundary text
+Content-Type: text/plain;
+Content-Disposition: attachment;
+        filename="test.txt"
+
+this is the attachment text
+
+.
+.
+.
+
+--XXXXboundary text--
+

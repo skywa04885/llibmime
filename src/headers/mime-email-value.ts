@@ -13,12 +13,37 @@
 */
 
 export interface MimeEmail {
-    name: string | null;
-    address: string;
+  name: string | null;
+  address: string;
 }
 
 export class MimeEmailValue {
-    public constructor(public emails: MimeEmail[]) { }
+  public constructor(public emails: MimeEmail[]) {}
 
-    
+  public get length(): number {
+    return this.emails.length;
+  }
+
+  /**
+   * Encodes the emails.
+   */
+  public encode(): string {
+    let arr: string[] = [];
+
+    for (const email of this.emails) {
+      if (!email.name || email.name.length === 0) {
+        arr.push(`<${email.address}>`);
+        continue;
+      }
+
+      if (email.name.includes('"')) {
+        arr.push(`"${email.name.replace('"', '\\"')}" <${email.address}>`);
+        continue;
+      }
+
+      arr.push(`${email.name} <${email.address}>`);
+    }
+
+    return arr.join(", ");
+  }
 }

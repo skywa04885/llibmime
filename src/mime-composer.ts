@@ -13,105 +13,242 @@
 */
 
 import pug from "pug";
-import { MimeContentType } from "./headers/mime-content-type";
-import { MimeHeaders } from "./mime-headers";
-import { MimeContentTransferEncoding } from "./headers/mime-content-transfer-encoding";
-import { Mime } from "./mime";
+import {mime_content_type_from_file_extension, MimeContentType,} from "./headers/mime-content-type";
+import {MimeHeaders} from "./mime-headers";
+import path from "path";
+import {MimeEmailValue} from "./headers/mime-email-value";
+import {MimeDateValue} from "./headers/mime-date-value";
+import {Readable, ReadableOptions} from "stream";
+import {MimeContentTypeValue} from "./headers/mime-content-type-value";
 
-export class MimeComposerAttachment { }
+export class MimeComposerSection {
+  public constructor(public type: MimeContentType) {}
+}
+
+export class MimeComposerBufferSection extends MimeComposerSection {
+  public constructor(type: MimeContentType, public buffer: Buffer) {
+    super(type);
+  }
+}
+
+export class MimeComposerPugSection extends MimeComposerSection {
+  public constructor(
+    type: MimeContentType,
+    public compile_template: pug.compileTemplate,
+    public locals: { [key: string]: any }
+  ) {
+    super(type);
+  }
+}
+
+export class MimeComposerAttachment {
+  public constructor(public type: MimeContentType, public file_name: string) {}
+}
 
 export class MimeComposerFileAttachment extends MimeComposerAttachment {
+  public constructor(
+    type: MimeContentType,
+    file_name: string,
+    public path: string
+  ) {
+    super(type, file_name);
+  }
 
+  /**
+   * Creates a new mime composer file attachment from an file.
+   * @param file_path the file path.
+   * @param type the type (optional, auto detect).
+   */
+  public static from_file(
+    file_path: string,
+    type: MimeContentType | null = null
+  ): MimeComposerFileAttachment {
+    // If there is no type yet, get it from the file extension.
+    if (type === null) {
+      const extension: string = path.extname(file_path);
+
+      // Gets the type from the extension, and if there is none throw an error
+      //  because te file format is not supported.
+      type = mime_content_type_from_file_extension(extension);
+      if (type === null) {
+        throw new Error(
+          `File extension ${extension} is not (yet) supported, if required modify and make a pull req.`
+        );
+      }
+    }
+
+    // Returns the result.
+    const file_name: string = path.basename(file_path);
+    return new MimeComposerFileAttachment(type, file_name, file_path);
+  }
 }
 
 export class MimeComposerBufferAttachment extends MimeComposerAttachment {
-
+  public constructor(
+    type: MimeContentType,
+    file_name: string,
+    public buffer: Buffer
+  ) {
+    super(type, file_name);
+  }
 }
 
 export class MimeComposer {
   protected _headers: MimeHeaders = new MimeHeaders();
+  protected _attachments: MimeComposerAttachment[] = [];
+  protected _sections: MimeComposerSection[] = [];
 
-  public constructor() {}
+  public readonly boundary: string;
+  public readonly message_id: string;
 
+  public constructor(domain: string) {
+    // Gets the boundary and message id.
+    this.boundary = MimeComposer.generate_boundary();
+    this.message_id = MimeComposer.generate_message_id(domain);
+
+    // Adds the initial headers.
+    let content_type: MimeContentTypeValue = new MimeContentTypeValue(MimeContentType.MultipartMixed);
+    content_type.set('boundary', this.boundary);
+    this._headers.set('content-type', )
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Add Pug
+  // Add Headers
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Adds a new header to the custom headers.
+   * @param key the key.
+   * @param value the value.
+   */
+  public add_header(key: string, value: string): void {
+    this._headers.set(key, value);
+  }
+
+  /**
+   * Sets the subject.
+   * @param subject the subject.
+   */
+  public set subject(subject: string) {
+    this._headers.set("subject", subject);
+  }
+
+  /**
+   * Sets the from header.
+   * @param from the from.
+   */
+  public set from(from: MimeEmailValue | string) {
+    if (typeof from === "string") {
+      this._headers.set("from", from);
+      return;
+    }
+
+    if (from.length !== 1) {
+      throw new Error("From must have 1 email address, not more.");
+    }
+
+    this._headers.set("from", from.encode());
+  }
+
+  /**
+   * Sets the to header.
+   * @param to the to.
+   */
+  public set to(to: MimeEmailValue | string) {
+    if (typeof to === "string") {
+      this._headers.set("to", to);
+      return;
+    }
+
+    if (to.length < 1) {
+      throw new Error("To must have at least 1 email address.");
+    }
+
+    this._headers.set("to", to.encode());
+  }
+
+  /**
+   * Sets the date header.
+   * @param date the date.
+   */
+  public set date(date: MimeDateValue | string) {
+    if (typeof date === "string") {
+      this._headers.set("date", date);
+      return;
+    }
+
+    this._headers.set("date", date.encode());
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Add Sections
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Adds a new pug rendered section.
    * @param type the type.
-   * @param transfer_Encoding the transfer encoding.
-   * @param template the template.
+   * @param compile_template the template.
    * @param locals the locals for rendering the template.
    */
   public add_pug_section(
     type: MimeContentType,
-    transfer_Encoding: MimeContentTransferEncoding,
-    template: pug.compileTemplate,
+    compile_template: pug.compileTemplate,
     locals: { [key: string]: any }
   ): void {
-    this.add_text_section(type, transfer_Encoding, template(locals));
+    this._sections.push(
+      new MimeComposerPugSection(type, compile_template, locals)
+    );
   }
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Add Text
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  protected static readonly _ADD_TEXT_SECTION__ALLOWED_TYPES = [
-    MimeContentType.TextPlain,
-    MimeContentType.TextHTML,
-  ];
-
-  protected static readonly _ADD_TEXT_SECTION__ALLOWED_TRANSFER_ENCODINGS = [
-    MimeContentTransferEncoding.Hex,
-    MimeContentTransferEncoding.Base64,
-    MimeContentTransferEncoding.QuotedPrintable,
-    MimeContentTransferEncoding._8Bit,
-    MimeContentTransferEncoding._7Bit,
-  ];
-
   /**
-   * Adds a new text section to the mime message.
+   * Adds a new text section to the composer.
    * @param type the type.
-   * @param transfer_encoding the transfer encoding.
    * @param data the data.
    */
-  public add_text_section(
-    type: MimeContentType,
-    transfer_encoding: MimeContentTransferEncoding,
-    data: Buffer | string
-  ) {
-    // Checks if the types are allowed.
-    if (!MimeComposer._ADD_TEXT_SECTION__ALLOWED_TYPES.includes(type)) {
-      throw new Error(`Type ${type} is not valid for an text section!`);
-    } else if (
-      !MimeComposer._ADD_TEXT_SECTION__ALLOWED_TRANSFER_ENCODINGS.includes(
-        transfer_encoding
-      )
-    ) {
-      throw new Error(
-        `Content transfer encoding ${transfer_encoding} is not valid for an text section!`
-      );
-    }
-
-    // If the data is not a buffer yet, turn it into a buffer.
+  public add_text_section(type: MimeContentType, data: Buffer | string): void {
+    // Turns the string into a buffer, if needed.
     if (typeof data === "string") {
       data = Buffer.from(data, "utf-8");
     }
 
-    // Creates the headers.
-    let headers: MimeHeaders = new MimeHeaders();
-    headers.set("content-type", type);
-    headers.set("content-transfer-encoding", transfer_encoding);
-
     // Creates the section.
-    this._push_alternative_section(new Mime(headers, data));
+    this._sections.push(new MimeComposerBufferSection(type, data));
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Add Attachment
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Adds a new file attachment.
+   * @param file_path the path of the file.
+   * @param type the (optional, auto detect) file type.
+   */
+  public add_file_attachment(
+    file_path: string,
+    type: MimeContentType | null = null
+  ): void {
+    this._attachments.push(
+      MimeComposerFileAttachment.from_file(file_path, type)
+    );
+  }
+
+  /**
+   * Adds a new buffer file attachment.
+   * @param file_name the file name.
+   * @param type the data type.
+   * @param buffer the data.
+   */
+  public add_buffer_attachment(
+    file_name: string,
+    type: MimeContentType,
+    buffer: Buffer
+  ): void {
+    // Creates the section.
+    this._sections.push(
+      new MimeComposerBufferAttachment(type, file_name, buffer)
+    );
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Generate Boundary
@@ -124,14 +261,15 @@ export class MimeComposer {
    * Generates a random boundary string for a multipart mime message.
    * @param boundary_length the boundary length.
    */
-  public static generate_boundary(boundary_length: number = 30) {
+  public static generate_boundary(boundary_length: number = 60) {
     // Initializes the result.
     let result: string = "";
 
     // Generates the specified number of random chars and adds them to the result.
     for (let i = 0; i < boundary_length; ++i) {
-      const random_index: number =
-        Math.random() * this._GENERATE_BOUNDARY__DICT.length;
+      const random_index: number = Math.floor(
+        Math.random() * this._GENERATE_BOUNDARY__DICT.length
+      );
       result += this._GENERATE_BOUNDARY__DICT[random_index];
     }
 
@@ -153,15 +291,16 @@ export class MimeComposer {
    */
   public static generate_message_id(
     domain: string,
-    random_length: number = 20
+    random_length: number = 60
   ): string {
     // Initializes the result.
     let result: string = "";
 
     // Generates the specified number of random chars and adds them to the result.
     for (let i = 0; i < random_length; ++i) {
-      const random_index: number =
-        Math.random() * this._GENERATE_BOUNDARY__DICT.length;
+      const random_index: number = Math.floor(
+        Math.random() * this._GENERATE_BOUNDARY__DICT.length
+      );
       result += this._GENERATE_BOUNDARY__DICT[random_index];
     }
 
@@ -171,5 +310,41 @@ export class MimeComposer {
 
     // Returns the reuslt.
     return result;
+  }
+}
+
+export enum MimeComposerReadableState {
+  RootHeaders,        // Writing the root headers.
+  AttachmentStart,    // Writing the start of an attachment.
+  AttachmentHeaders,  // Writing headers of an attachment.
+  AttachmentBody,     // Writing body of an attachment.
+  AttachmentEnd,      // Writing the end of an attachment.
+  SectionStart,       // Writing the start of a section.
+  SectionHeaders,     // Writing headers of an attachment.
+  SectionBody,        // Writing body of an attachment.
+  SectionEnd,         // Writing the end of a section.
+}
+
+export class MimeComposerReadable extends Readable {
+  protected _state: MimeComposerReadableState = MimeComposerReadableState.RootHeaders;
+
+  public constructor(
+    public readonly composer: MimeComposer,
+    public readonly utf8_support: boolean = false,
+    readable_options: ReadableOptions = {}
+  ) {
+    super(readable_options);
+  }
+
+  protected _read_root_headers(size: number): void {
+    this.composer.he
+  }
+
+  public _read(size: number) {
+    switch (this._state) {
+      case MimeComposerReadableState.RootHeaders:
+        this._read_root_headers(size);
+        break;
+    }
   }
 }

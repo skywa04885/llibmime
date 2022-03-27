@@ -45,4 +45,17 @@ export class MimeContentTypeValue extends MimeMappedHeaderValue {
     // Returns the result.
     return result;
   }
+
+  public encode(): string {
+    let arr: string[] = [];
+
+    // Pushes the type.
+    arr.push(this.type!);
+
+    // Adds the other elements.
+    arr = arr.concat(super.encode_as_array());
+
+    // Returns the joined array.
+    return arr.join("; ");
+  }
 }

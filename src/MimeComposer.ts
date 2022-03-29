@@ -46,6 +46,8 @@ async function content_disposition_value_from_attachment(
     content_disposition_value.creation_date = stat.ctime;
     content_disposition_value.modification_date = stat.mtime;
     content_disposition_value.read_date = new Date(); // Now obviously.
+  } else {
+    throw new Error('Invalid attachment.');
   }
 
   return content_disposition_value;

@@ -1,10 +1,12 @@
 {
   "name": "llibmime",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +16,13 @@
     "@types/pug": "^2.0.6",
     "prettier": "^2.6.1",
     "pug": "^3.0.2"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skywa04885/llibmime"
   },
   "dependencies": {
     "llibencoding": "^1.0.6"

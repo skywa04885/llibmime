@@ -14,5 +14,8 @@
     "@types/pug": "^2.0.6",
     "prettier": "^2.6.1",
     "pug": "^3.0.2"
+  },
+  "dependencies": {
+    "llibencoding": "^1.0.1"
   }
 }

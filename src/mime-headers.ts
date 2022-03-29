@@ -121,7 +121,7 @@ export function mime_header_encode(
     // The segment fits in the remaining space.
     ////////////////////////////////////////////////////////////
 
-    if (segment.length <= max_line_length - first_level_wsp_count) {
+    if (segment.length <= (max_line_length - first_level_wsp_count)) {
       // Creates the new line.
       new_line(first_level_wsp_count);
 

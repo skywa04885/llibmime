@@ -1,6 +1,8 @@
 import { MimeContentType } from "../headers/mime-content-type";
-import {MimeComposer, MimeComposerReadable} from "../mime-composer";
+import { mime_compose, MimeComposer } from "../mime-composer";
 import { MimeEmailValue } from "../headers/mime-email-value";
+import { MimeDateValue } from "../headers/mime-date-value";
+import {Readable} from "stream";
 
 const data = `Test 123\r
 Another test line\r
@@ -18,8 +20,11 @@ composer.to = new MimeEmailValue([
   { name: "Luke Rieff", address: "luke.rieff@mgail.com" },
   { name: "Sem Rieff", address: "sem.rieff@mgail.com" },
 ]);
+composer.date = new MimeDateValue();
+composer.x_mailer = 'LukeMail';
 
-composer.add_file_attachment('eml/test.txt');
+composer.add_buffer_attachment('asd', MimeContentType.ApplicationOctetStream, Buffer.from('<h1>neger</h1>'));
+composer.add_file_attachment('eml/test.txt', MimeContentType.ApplicationOctetStream);
 composer.add_file_attachment('eml/test2.csv');
 
 composer.add_text_section(MimeContentType.TextPlain, `Hello world
@@ -32,12 +37,6 @@ composer.add_text_section(MimeContentType.TextHTML, `<p>Hello world</p>
 <br />
 <p>this is a test message.</p>`);
 
-console.log(composer)
-const readable = new MimeComposerReadable(composer);
-readable.pipe(process.stdout);
-
-// const parser: MimeDecoder = new MimeDecoder();
-//
-// fs.createReadStream('./eml/original_msg.eml', {
-//     highWaterMark: 1000
-// }).pipe(parser);
+let a =mime_compose(composer, false);
+a.pipe(process.stdout);
+a.on('end', () => console.log('end'))

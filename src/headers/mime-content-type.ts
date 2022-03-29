@@ -17,6 +17,12 @@ export enum MimeContentType {
     ApplicationGZIP = 'application/gzip',
 }
 
+export const PLAIN_TEXT_MIME_CONTENT_TYPES: MimeContentType[] = [
+    MimeContentType.TextPlain,
+    MimeContentType.TextHTML,
+    MimeContentType.TextCSV,
+];
+
 const MIME_CONTENT_TYPE_FROM_FILE_EXTENSION_MAP: {[key: string]: MimeContentType} = {
     'txt': MimeContentType.TextPlain,
     'html': MimeContentType.TextHTML,

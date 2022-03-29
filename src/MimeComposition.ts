@@ -17,17 +17,12 @@ import {
   mime_content_type_from_file_extension,
   MimeContentType,
   PLAIN_TEXT_MIME_CONTENT_TYPES,
-} from "./headers/mime-content-type";
-import {mime_header_encode, MimeHeaders} from "./mime-headers";
+} from "./headers/MimeContentType";
+import {MimeHeaders} from "./MimeHeaders";
 import path from "path";
-import {MimeEmailValue} from "./headers/mime-email-value";
-import {MimeDateValue} from "./headers/mime-date-value";
-import {Readable} from "stream";
-import {MimeContentTypeValue} from "./headers/mime-content-type-value";
-import {MimeContentTransferEncoding} from "./headers/mime-content-transfer-encoding";
-import * as fs from "fs";
-import { Base64EncoderStream } from 'llibencoding/dist/Base64EncoderStream';
-import { QuotedPrintableEncoderStream } from 'llibencoding/dist/QuoatedPrintableEncoderStream';
+import {MimeEmailValue} from "./headers/MimeEmailValue";
+import {MimeDateValue} from "./headers/MimeDateValue";
+import {MimeContentTypeValue} from "./headers/MimeContentTypeValue";
 
 export class MimeComposerSection {
   public constructor(public type: MimeContentType) {}
@@ -101,7 +96,7 @@ export class MimeComposerBufferAttachment extends MimeComposerAttachment {
   }
 }
 
-export class MimeComposer {
+export class MimeComposition {
   protected _headers: MimeHeaders = new MimeHeaders();
   protected _attachments: MimeComposerAttachment[] = [];
   protected _sections: MimeComposerSection[] = [];
@@ -111,8 +106,8 @@ export class MimeComposer {
 
   public constructor(domain: string) {
     // Gets the boundary and message id.
-    this.boundary = MimeComposer.generate_boundary();
-    this.message_id = MimeComposer.generate_message_id(domain);
+    this.boundary = MimeComposition.generate_boundary();
+    this.message_id = MimeComposition.generate_message_id(domain);
 
     // Sets the content type.
     let content_type: MimeContentTypeValue = new MimeContentTypeValue(
@@ -130,6 +125,10 @@ export class MimeComposer {
 
   public get headers(): MimeHeaders {
     return this._headers;
+  }
+
+  public get sections(): MimeComposerSection[] {
+    return this._sections;
   }
 
   public get attachments(): MimeComposerAttachment[] {
@@ -284,9 +283,9 @@ export class MimeComposer {
    * Generates a random boundary string for a multipart mime message.
    * @param boundary_length the boundary length.
    */
-  public static generate_boundary(boundary_length: number = 60) {
+  public static generate_boundary(boundary_length: number = 30) {
     // Initializes the result.
-    let result: string = "";
+    let result: string = "Ffeir";
 
     // Generates the specified number of random chars and adds them to the result.
     for (let i = 0; i < boundary_length; ++i) {
@@ -334,125 +333,4 @@ export class MimeComposer {
     // Returns the reuslt.
     return result;
   }
-}
-
-/**
- * Gets the transfer encoding for the given type.
- * @param type the type.
- * @param utf8_support if the SMTP server supports UTF8 messages.
- * @protected
- */
-function get_transfer_encoding_for_type(
-  type: MimeContentType,
-  utf8_support: boolean
-): MimeContentTransferEncoding {
-  // Checks if we don't have UTF-8 support, if so we will perform some
-  //  encoding of the chars.
-  if (!utf8_support) {
-    // If plain text, just do quoted printable, the easiest one.
-    if (PLAIN_TEXT_MIME_CONTENT_TYPES.includes(type)) {
-      return MimeContentTransferEncoding.QuotedPrintable;
-    }
-
-    // Since it's not plain text use Base64 encoding.
-    return MimeContentTransferEncoding.Base64;
-  }
-
-  // Since we have UTF-8 support, check if we're dealing with text based types
-  //  if so use text.
-  if (PLAIN_TEXT_MIME_CONTENT_TYPES.includes(type)) {
-    return MimeContentTransferEncoding._8Bit;
-  }
-
-  // We're not dealing with text, simply perform base64 encoding.
-  return MimeContentTransferEncoding.Base64;
-}
-
-async function* __mime_compose(
-  composer: MimeComposer,
-  utf8_support: boolean,
-  max_line_length: number = 76
-) {
-  for (const [key, value] of composer.headers.pairs()) {
-    const buffer: Buffer = Buffer.from(
-      mime_header_encode(key, value, {
-        max_line_length,
-      })
-    );
-    yield buffer;
-  }
-
-  for (const attachment of composer.attachments) {
-    // Writes the start.
-    yield Buffer.from(`\r\n--${composer.boundary}\r\n`);
-
-    // Gets the content transfer encoding.
-    const transfer_encoding: MimeContentTransferEncoding =
-      get_transfer_encoding_for_type(attachment.type, utf8_support);
-
-    // Creates the headers for the attachment.
-    let attachment_headers: MimeHeaders = new MimeHeaders();
-    attachment_headers.set("content-type", attachment.type);
-    attachment_headers.set("content-transfer-encoding", transfer_encoding);
-
-    // Writes the header.
-    for (const [key, value] of attachment_headers.pairs()) {
-      const buffer: Buffer = Buffer.from(
-        mime_header_encode(key, value, {
-          max_line_length,
-        })
-      );
-      yield buffer;
-    }
-
-    // Writes a newline to separate the header from the body.
-    yield "\r\n";
-
-    // Checks the type of the attachment.
-    let read_stream: Readable;
-    if (attachment instanceof MimeComposerBufferAttachment) {
-      read_stream = Readable.from(attachment.buffer);
-    } else if (attachment instanceof MimeComposerFileAttachment) {
-      read_stream = fs.createReadStream(attachment.path, {
-
-      });
-    } else {
-      throw new Error('Invalid attachment instance in composer.');
-    }
-
-    // Checks how to format the part.
-    if (transfer_encoding === MimeContentTransferEncoding.Base64) {
-      // Creates the Base64 encoding stream.
-      const base64_stream: Base64EncoderStream = new Base64EncoderStream({
-        max_line_length,
-      });
-      read_stream.pipe(base64_stream);
-
-      // Reads all the chunks of the base64 stream.
-      for await (const chunk of base64_stream) {
-        yield chunk;
-      }
-    } else if (transfer_encoding === MimeContentTransferEncoding.QuotedPrintable) {
-      const quoted_printable_stream: QuotedPrintableEncoderStream = new QuotedPrintableEncoderStream({
-        max_line_length
-      });
-
-      read_stream.pipe(quoted_printable_stream);
-
-      // Reads all the chunks of the base64 stream.
-      for await (const chunk of quoted_printable_stream) {
-        yield chunk;
-      }
-    }
-  }
-
-  // Writes the final section end.
-  yield Buffer.from(`\r\n--${composer.boundary}--\r\n`);
-}
-
-export function mime_compose(
-  composer: MimeComposer,
-  utf8_support: boolean
-): Readable {
-  return Readable.from(__mime_compose(composer, utf8_support));
 }

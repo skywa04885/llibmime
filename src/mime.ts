@@ -12,9 +12,9 @@
     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import {MimeHeaders} from "./mime-headers";
+import {MimeHeaders} from "./MimeHeaders";
 import {Readable, ReadableOptions, Writable, WritableOptions} from "stream";
-import {MimeContentTypeValue} from "./headers/mime-content-type-value";
+import {MimeContentTypeValue} from "./headers/MimeContentTypeValue";
 
 export const MIME_PARSER_HEADER_END: string = '\r\n\r\n';
 

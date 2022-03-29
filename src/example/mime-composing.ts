@@ -1,8 +1,9 @@
-import { MimeContentType } from "../headers/mime-content-type";
-import { mime_compose, MimeComposer } from "../mime-composer";
-import { MimeEmailValue } from "../headers/mime-email-value";
-import { MimeDateValue } from "../headers/mime-date-value";
+import { MimeContentType } from "../headers/MimeContentType";
+import { MimeComposition } from "../MimeComposition";
+import { MimeEmailValue } from "../headers/MimeEmailValue";
+import { MimeDateValue } from "../headers/MimeDateValue";
 import {Readable} from "stream";
+import {mime_compose} from "../MimeComposer";
 
 const data = `Test 123\r
 Another test line\r
@@ -11,7 +12,7 @@ works\r
 pretty\r
 sweet`;
 
-const composer = new MimeComposer('localhost.local');
+const composer = new MimeComposition('localhost.local');
 composer.subject = "Hello World";
 composer.from = new MimeEmailValue([
   { name: null, address: "webmaster@fannst.nl" },
@@ -37,6 +38,6 @@ composer.add_text_section(MimeContentType.TextHTML, `<p>Hello world</p>
 <br />
 <p>this is a test message.</p>`);
 
-let a =mime_compose(composer, false);
+let a = mime_compose(composer, false);
 a.pipe(process.stdout);
 a.on('end', () => console.log('end'))

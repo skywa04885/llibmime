@@ -31,6 +31,20 @@ export class MimeMappedHeaderValue {
   }
 
   /**
+   * Gets a value from the map, but throws an error if not there.
+   * @param key the key.
+   * @param standardized if the key is already standardized.
+   */
+  public get_throw(key: string, standardized: boolean = false): string {
+    let val: string | null = this.get(key);
+    if (!val) {
+      throw new Error(`No parameter with key: ${key}`);
+    }
+
+    return val;
+  }
+
+  /**
    * Puts a key/ value pair into the map.
    * @param key the key.
    * @param value the value.

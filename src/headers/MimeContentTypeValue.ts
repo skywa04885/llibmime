@@ -12,8 +12,8 @@
     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import { MimeContentType } from "./mime-content-type";
-import { MimeMappedHeaderValue } from "./mime-mapped-header-value";
+import { MimeContentType } from "./MimeContentType";
+import { MimeMappedHeaderValue } from "./MimeMappedHeaderValue";
 
 export class MimeContentTypeValue extends MimeMappedHeaderValue {
   /**
@@ -22,6 +22,14 @@ export class MimeContentTypeValue extends MimeMappedHeaderValue {
    */
   public constructor(public type: MimeContentType | string | null = null) {
     super();
+  }
+
+  public set charset(charset: string) {
+    this.set('charset', charset);
+  }
+
+  public get charset() {
+    return this.get_throw('charset');
   }
 
   /**
@@ -46,6 +54,10 @@ export class MimeContentTypeValue extends MimeMappedHeaderValue {
     return result;
   }
 
+  /**
+   * Encodes the current content type header.
+   * @return the encoded header.
+   */
   public encode(): string {
     let arr: string[] = [];
 

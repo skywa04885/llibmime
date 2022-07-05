@@ -1,6 +1,6 @@
 {
   "name": "llibmime",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,6 +25,7 @@
     "url": "https://github.com/skywa04885/llibmime"
   },
   "dependencies": {
-    "llibencoding": "^1.0.6"
+    "llibemailaddress": "^1.0.1",
+    "llibencoding": "^1.1.1"
   }
 }

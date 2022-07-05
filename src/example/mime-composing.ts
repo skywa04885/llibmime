@@ -4,6 +4,7 @@ import { MimeEmailValue } from "../headers/MimeEmailValue";
 import { MimeDateValue } from "../headers/MimeDateValue";
 import {Readable} from "stream";
 import {mime_compose} from "../MimeComposer";
+import { EmailAddress } from "llibemailaddress";
 
 const data = `Test 123\r
 Another test line\r
@@ -15,11 +16,10 @@ sweet`;
 const composer = new MimeComposition('localhost.local');
 composer.subject = "Hello World";
 composer.from = new MimeEmailValue([
-  { name: null, address: "webmaster@fannst.nl" },
+  EmailAddress.fromAddress('webmaster@fannst.nl')
 ]);
 composer.to = new MimeEmailValue([
-  { name: "Luke Rieff", address: "luke.rieff@mgail.com" },
-  { name: "Sem Rieff", address: "sem.rieff@mgail.com" },
+  EmailAddress.fromAddress('luke.rieff@gmail.com')
 ]);
 composer.date = new MimeDateValue();
 composer.x_mailer = 'LukeMail';

@@ -12,13 +12,10 @@
     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-export interface MimeEmail {
-  name: string | null;
-  address: string;
-}
+import { EmailAddress } from "llibemailaddress";
 
 export class MimeEmailValue {
-  public constructor(public emails: MimeEmail[]) {}
+  public constructor(public emails: EmailAddress[]) {}
 
   public get length(): number {
     return this.emails.length;
@@ -28,24 +25,6 @@ export class MimeEmailValue {
    * Encodes the emails.
    */
   public encode(): string {
-    let arr: string[] = [];
-
-    for (const email of this.emails) {
-      // If there is no name, or it is empty, just push the address only.
-      if (!email.name || email.name.length === 0) {
-        arr.push(`<${email.address}>`);
-        continue;
-      }
-
-      // Checks if we need to add quotes to the name.
-      if (/^[a-zA-Z_\-.\d\s]+$/.test(email.name)) {
-        arr.push(`"${email.name.replace('"', '\\"')}" <${email.address}>`);
-      }
-
-      // Pushes the name with address, without quoting them.
-      arr.push(`${email.name} <${email.address}>`);
-    }
-
-    return arr.join(", ");
+    return this.emails.map((email: EmailAddress): string => email.encode()).join(', ');
   }
 }

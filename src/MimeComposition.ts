@@ -23,6 +23,7 @@ import path from "path";
 import {MimeEmailValue} from "./headers/MimeEmailValue";
 import {MimeDateValue} from "./headers/MimeDateValue";
 import {MimeContentTypeValue} from "./headers/MimeContentTypeValue";
+import { EmailAddress } from "llibemailaddress";
 
 export class MimeComposerSection {
   public constructor(public type: MimeContentType) {}
@@ -119,7 +120,7 @@ export class MimeComposition {
     // Sets the message id.
     this._headers.set(
       "message-id",
-      new MimeEmailValue([{ name: null, address: this.message_id }]).encode()
+      new MimeEmailValue([ EmailAddress.fromAddress(this.message_id) ]).encode()
     );
   }
 

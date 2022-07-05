@@ -146,7 +146,7 @@ async function* mime_compose_generator(
     }
 
     // Writes a newline to separate the header from the body.
-    yield "\r\n";
+    yield Buffer.from("\r\n");
 
     // Checks the type of the attachment, and creates the read stream.
     let read_stream: Readable;
@@ -250,6 +250,7 @@ async function* mime_compose_generator(
         const quoted_printable_stream: QuotedPrintableEncodeStream =
           new QuotedPrintableEncodeStream({
             max_line_length,
+            buffer_output: true,
           });
 
         // Reads all the chunks of the base64 stream.

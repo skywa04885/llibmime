@@ -70,7 +70,7 @@ export class MimeDecoder extends Writable {
 
     // Loops over the headers and gets some useful info from them, and how to handle
     //  the next data in the buffer.
-    let content_type_raw: string | null = this._parsed_headers.get('content-type');
+    let content_type_raw: string | null = this._parsed_headers.find('content-type')?.at(0)?.value ?? null;
     if (!content_type_raw) {
       throw new Error('Content type header is missing, this is required for parsing.')
     }

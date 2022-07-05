@@ -17,7 +17,8 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 export const MIME_HEADER_KEY_REGEXP: RegExp = /^([a-zA-Z_]+[a-zA-Z0-9_\-]+)$/;
-export const MIME_HEADER_NON_ASCII_ENCODED_REGEXP: RegExp = /=\?[a-zA-Z0-9_\-]+\?[a-zA-Z]\?[^\?]*\?=/g;
+export const MIME_HEADER_NON_ASCII_ENCODED_REGEXP: RegExp =
+  /=\?[a-zA-Z0-9_\-]+\?[a-zA-Z]\?[^\?]*\?=/g;
 export const MIME_HEADER_SEPARATOR: string = ": ";
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +122,7 @@ export function mime_header_encode(
     // The segment fits in the remaining space.
     ////////////////////////////////////////////////////////////
 
-    if (segment.length <= (max_line_length - first_level_wsp_count)) {
+    if (segment.length <= max_line_length - first_level_wsp_count) {
       // Creates the new line.
       new_line(first_level_wsp_count);
 
@@ -286,42 +287,53 @@ export function mime_header_decode(raw: string): string[] {
 // Headers
 //////////////////////////////////////////////////////////////////////////////////////
 
+export interface MimeHeader {
+  key: string;
+  value: string;
+}
+
 export class MimeHeaders {
-  protected _map: { [key: string]: string } = {};
+  protected _headers: MimeHeader[] = [];
 
   /**
-   * Sets a header.
+   * Appends a header.
    * @param key the key (will be transformed to lower case).
    * @param value the value.
    * @param lower disables lowercase transform, better for performance.
    */
-  public set(key: string, value: string, lower: boolean = true): void {
+  public append(key: string, value: string, lower: boolean = true): void {
     if (lower) {
       key = key.toLowerCase();
     }
 
-    this._map[key] = value;
+    this._headers.push({
+      key,
+      value,
+    });
   }
 
   /**
-   * Gets a header.
-   * @param key the key.
+   * Finds all the headers with the matching key.
+   * @param key the key to search for.
    * @param lower disables lowercase transform, better for performance.
+   * @returns all the headers with the matching key.
    */
-  public get(key: string, lower: boolean = true): string | null {
+  public find(key: string, lower: boolean = true): MimeHeader[] | null {
     if (lower) {
       key = key.toLowerCase();
     }
 
-    return this._map[key] ?? null;
+    return this._headers.filter((header: MimeHeader): boolean => {
+      return header.key === key;
+    });
   }
 
   /**
    * Gets all the header key/ value pairs.
    */
-  public *pairs(): Generator<string[]> {
-    for (const pair of Object.entries(this._map)) {
-      yield pair;
+  public *pairs(): Generator<MimeHeader> {
+    for (const header of this._headers) {
+      yield header;
     }
   }
 
@@ -331,16 +343,17 @@ export class MimeHeaders {
    * @return the encoded headers.
    */
   public encode(options: MimeHeaderEncodeOptions = {}): string {
-    return Object.entries(this._map)
-      .map(([key, value]: string[]) => {
+    return this._headers
+      .map(({ key, value }: MimeHeader) => {
         return mime_header_encode(key, value, options);
       })
       .join("");
   }
 
   /**
-   * Decodes the given headers.
-   * @param raw the raw headers.
+   * 
+   * @param raw the raw headers to decode.
+   * @returns the decoded headers.
    */
   public static decode(raw: string): MimeHeaders {
     // Gets all the lines.
@@ -364,7 +377,7 @@ export class MimeHeaders {
     const mime_headers: MimeHeaders = new MimeHeaders();
     lines.forEach((line: string) => {
       const [key, value] = mime_header_decode(line);
-      mime_headers.set(key, value);
+      mime_headers.append(key, value);
     });
     return mime_headers;
   }

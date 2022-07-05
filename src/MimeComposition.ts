@@ -115,10 +115,10 @@ export class MimeComposition {
       MimeContentType.MultipartMixed
     );
     content_type.set("boundary", this.boundary);
-    this._headers.set("content-type", content_type.encode());
+    this._headers.append("content-type", content_type.encode());
 
     // Sets the message id.
-    this._headers.set(
+    this._headers.append(
       "message-id",
       this.message_id
     );
@@ -145,7 +145,7 @@ export class MimeComposition {
    * @param subject the subject.
    */
   public set subject(subject: string) {
-    this._headers.set("subject", subject);
+    this._headers.append("subject", subject);
   }
 
   /**
@@ -154,7 +154,7 @@ export class MimeComposition {
    */
   public set from(from: MimeEmailValue | string) {
     if (typeof from === "string") {
-      this._headers.set("from", from);
+      this._headers.append("from", from);
       return;
     }
 
@@ -162,7 +162,7 @@ export class MimeComposition {
       throw new Error("From must have 1 email address, not more.");
     }
 
-    this._headers.set("from", from.encode());
+    this._headers.append("from", from.encode());
   }
 
   /**
@@ -171,7 +171,7 @@ export class MimeComposition {
    */
   public set to(to: MimeEmailValue | string) {
     if (typeof to === "string") {
-      this._headers.set("to", to);
+      this._headers.append("to", to);
       return;
     }
 
@@ -179,7 +179,7 @@ export class MimeComposition {
       throw new Error("To must have at least 1 email address.");
     }
 
-    this._headers.set("to", to.encode());
+    this._headers.append("to", to.encode());
   }
 
   /**
@@ -188,11 +188,11 @@ export class MimeComposition {
    */
   public set date(date: MimeDateValue | string) {
     if (typeof date === "string") {
-      this._headers.set("date", date);
+      this._headers.append("date", date);
       return;
     }
 
-    this._headers.set("date", date.encode());
+    this._headers.append("date", date.encode());
   }
 
   /**
@@ -200,7 +200,7 @@ export class MimeComposition {
    * @param mailer
    */
   public set x_mailer(mailer: string) {
-    this._headers.set("x-mailer", mailer);
+    this._headers.append("x-mailer", mailer);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

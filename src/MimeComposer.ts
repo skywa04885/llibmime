@@ -100,7 +100,7 @@ async function* mime_compose_generator(
    * @return the buffers of each header.
    */
   function* _write_headers(headers: MimeHeaders): Generator<Buffer> {
-    for (const [key, value] of headers.pairs()) {
+    for (const { key, value } of headers.pairs()) {
       const buffer: Buffer = Buffer.from(
         mime_header_encode(key, value, {
           max_line_length,
@@ -133,9 +133,9 @@ async function* mime_compose_generator(
 
     // Creates the headers for the attachment.
     let attachment_headers: MimeHeaders = new MimeHeaders();
-    attachment_headers.set("content-type", attachment.type);
-    attachment_headers.set("content-transfer-encoding", transfer_encoding);
-    attachment_headers.set(
+    attachment_headers.append("content-type", attachment.type);
+    attachment_headers.append("content-transfer-encoding", transfer_encoding);
+    attachment_headers.append(
       "content-disposition",
       (await content_disposition_value_from_attachment(attachment)).encode()
     );
@@ -214,8 +214,8 @@ async function* mime_compose_generator(
     content_type_value.set("charset", "utf-8");
 
     let section_headers: MimeHeaders = new MimeHeaders();
-    section_headers.set("content-type", content_type_value.encode());
-    section_headers.set("content-transfer-encoding", transfer_encoding);
+    section_headers.append("content-type", content_type_value.encode());
+    section_headers.append("content-transfer-encoding", transfer_encoding);
 
     // Writes the headers.
     for (const buffer of _write_headers(section_headers)) {

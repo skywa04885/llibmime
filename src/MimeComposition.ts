@@ -120,7 +120,7 @@ export class MimeComposition {
     // Sets the message id.
     this._headers.set(
       "message-id",
-      new MimeEmailValue([ EmailAddress.fromAddress(this.message_id) ]).encode()
+      this.message_id
     );
   }
 

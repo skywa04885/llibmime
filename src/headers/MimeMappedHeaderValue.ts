@@ -92,7 +92,7 @@ export class MimeMappedHeaderValue {
       // Trims the pair.
       pair = pair.trim();
 
-      // Makes sure there is a separator.
+      // Makes sur_\-.e there is a separator.
       const index: number = pair.indexOf("=");
       if (index === -1) {
         throw new Error("Invalid pair in mime content type.");

@@ -31,16 +31,18 @@ export class MimeEmailValue {
     let arr: string[] = [];
 
     for (const email of this.emails) {
+      // If there is no name, or it is empty, just push the address only.
       if (!email.name || email.name.length === 0) {
         arr.push(`<${email.address}>`);
         continue;
       }
 
-      if (email.name.includes('"')) {
+      // Checks if we need to add quotes to the name.
+      if (/^[a-zA-Z_\-.\d\s]+$/.test(email.name)) {
         arr.push(`"${email.name.replace('"', '\\"')}" <${email.address}>`);
-        continue;
       }
 
+      // Pushes the name with address, without quoting them.
       arr.push(`${email.name} <${email.address}>`);
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "llibmime",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "llibemailaddress": "^1.0.1",
-    "llibencoding": "^1.1.1"
+    "llibencoding": "^1.1.1",
+    "llibipaddress": "^1.0.5"
   }
 }

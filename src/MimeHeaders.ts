@@ -318,7 +318,7 @@ export class MimeHeaders {
    * @param lower disables lowercase transform, better for performance.
    * @returns all the headers with the matching key.
    */
-  public find(key: string, lower: boolean = true): MimeHeader[] | null {
+  public find(key: string, lower: boolean = true): MimeHeader[] {
     if (lower) {
       key = key.toLowerCase();
     }
